@@ -1,0 +1,115 @@
+package Tree::Smart::Node;
+use strict;
+use Carp;
+
+sub _TRUE  { 1==1 }
+sub _FALSE { !_TRUE }
+
+
+BEGIN {
+  use vars qw(@ISA);
+  @ISA = qw(Tree::Node::Binary);
+}
+
+
+sub _balance ($$) {
+  my $self	= shift;
+  my ($key)	= @_;
+  
+  my ($newRoot, @storBottom);
+  
+  # Initialize the storage trees.
+  my @storage;
+  $storage[0] = $self->leaf unless defined $storage[0];
+  $storage[1] = $self->leaf unless defined $storage[1];
+
+  # Perform a top-down splay.
+  my ($newRoot, @storageBottom) = $self->_rotate($key, @storage);
+  
+  # All of Perl's hashes, and all of Perl's mem,
+  # put the splay tree back together again.
+  $storBottom[0]->[$RIGHT] 	= $newRoot->[$LEFT];
+  $storBottom[1]->[$LEFT]	= $newRoot->[$RIGHT];
+  $newRoot->[$LEFT] 	= $storage[0]->[$RIGHT];
+  $newRoot->[$RIGHT] 	= $storage[1]->[$LEFT];
+  
+  return $newRoot;		# Fini!
+}
+
+
+sub _splay ($$@) {
+  my $self		= shift;
+  my ($key, @storage)	= @_;
+  
+  my($child, $gchild);		# my child & grandchild
+  my($self_cmp, $ch_cmp);	# results of the comparisons of the key
+  my($dir, $dir2);		# Directions of the path to the key
+  
+  # Find my child.
+  $self_cmp 	= $self->cmp($key);
+  $dir			= $self_cmp < 0;
+  $child		= $self->_link($dir);
+  # No child, or we found the key, we're done.
+  # I am the root of the new tree after reconstruction.
+  unless( $self_cmp && defined $child ) {
+    return ($self, @storage);
+  }
+  
+  # Find my grandchild
+  $ch_cmp		= $child->cmp($key);
+  $dir2			= $ch_cmp < 0;
+  $gchild		= $child->_link($dir);
+  
+  # No grandchild, or we found the key, we're done.
+  # child is the root of the new tree after reconstruction.
+  unless( $ch_cmp && defined $gchild ) {
+    undef($self->_link($dir));
+    $storage[!$dir]->_link($dir) = $self; # Put me in storage
+    $storage[!$dir] = $self;	# I am the end of the storage tree.
+    
+    # My child is the new root.
+    return ($child, @storage);
+  }
+  
+  else {			# split the tree up.
+    if ( $dir == $dir2 ) {	# zig-zig
+      
+      # Perform 2 single rotations
+      $self->_link($dir) = $child->_link(!$dir);
+      $child->_link(!$dir) = $self;
+      $child->_link($dir) = undef;
+      
+      # Store my child & me
+      $storage[!$dir]->_link($dir) = $child;
+      $storage[!$dir] = $child; # My child is the end of storage
+    }
+    
+    else {			# zig-zag
+      # Perform a double rotation
+      $self->_link($dir) = undef;
+      $storage[!$dir]->_link($dir) = $self; # Store me
+      $storage[!$dir] = $self;	# I am the bottom.
+      $child->_link($dir2) = undef;
+      $storage[!$dir2]->_link($dir) = $child; # Store my child
+      $storage[!$dir2] = $child; # It is the bottom.
+    }
+    
+    # Recurse.
+    ($newRoot, @storBottom) = $gchild->_splay($key, @storage);
+  }  
+}
+
+
+# overrides SUPER::insert
+sub insert ($$;$){
+  my $self = shift;
+  my ($key, $value) = @_;
+
+  my $node = $self->_balance($key);
+  if ( $node->eq($key) ) {
+    $node->[$VALUE] = $value;
+  }
+  else {
+    
+  }
+}
