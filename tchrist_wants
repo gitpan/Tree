@@ -1,4 +1,0 @@
-O(N) on a complete C< each %tied_tree_hash > traversal.
-
-O(1) successor and predecessor.
-
