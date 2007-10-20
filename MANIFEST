@@ -24,6 +24,8 @@ t/Tree/016_events.t
 t/Tree/017_traverse_scalar.t
 t/Tree_Binary/000_binary_trees.t
 t/Tree_Binary/001_mirror.t
+t/Tree_Binary/002_clone.t
+t/Tree_Fast/001_clone.t
 t/pod.t
 t/pod_coverage.t
 t/tests.pm

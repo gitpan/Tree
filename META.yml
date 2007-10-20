@@ -1,9 +1,13 @@
 ---
 name: Tree
-version: 1.00
-author: ~
+version: 1.01
+author:
+  - 'Rob Kinyon E<lt>rob.kinyon@iinteractive.comE<gt>'
+  - 'Stevan Little E<lt>stevan.little@iinteractive.comE<gt>'
 abstract: an N-ary tree
 license: perl
+resources:
+  license: http://dev.perl.org/licenses/
 requires:
   Scalar::Util: 1.10
   perl: 5.6.0
@@ -16,14 +20,16 @@ build_requires:
 provides:
   Tree:
     file: lib/Tree.pm
-    version: 1.00
+    version: 1.01
   Tree::Binary:
     file: lib/Tree/Binary.pm
-    version: 1.00
+    version: 1.01
   Tree::Fast:
     file: lib/Tree/Fast.pm
-    version: 1.00
+    version: 1.01
   Tree::Null:
     file: lib/Tree/Fast.pm
-    version: ~
-generated_by: Module::Build version 0.2701
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

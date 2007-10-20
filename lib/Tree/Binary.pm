@@ -1,13 +1,15 @@
 package Tree::Binary;
 
+use 5.006;
+
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 
 use Scalar::Util qw( blessed );
 
 use base qw( Tree );
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 sub _init {
     my $self = shift;
@@ -62,6 +64,13 @@ sub _set_get_child {
     else {
         return $self->children->[$index];
     }
+}
+
+sub _clone_children {
+    my ($self, $clone) = @_;
+
+    @{ $clone->{_children} } = ();
+    $clone->add_child({}, map { $_->clone } @{ $self->{_children} });
 }
 
 sub children {

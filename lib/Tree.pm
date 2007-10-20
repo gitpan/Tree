@@ -1,11 +1,11 @@
 package Tree;
 
-use 5.6.0;
+use 5.006;
 
 use strict;
-use warnings;
+use warnings FATAL => 'all';
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use Scalar::Util qw( blessed refaddr weaken );
 
@@ -283,7 +283,7 @@ sub set_value {
     my $old_value = $self->value();
     $self->SUPER::set_value( @_ );
 
-    $self->event( 'value', $self, $old_value );
+    $self->event( 'value', $self, $old_value, $self->value );
 
     return $self;
 }
@@ -691,7 +691,7 @@ passed into the remove_child() call.
 
 This event will trigger as the last step in a L<set_value()> call.
 
-The parameters will be C<( $self, $old_value, $new_value )> where
+The parameters will be C<( $self, $old_value )> where
 C<$old_value> is what the value was before it was changed. The new value can
 be accessed through C<$self-E<gt>value()>.
 
@@ -797,10 +797,10 @@ L<Devel::Cover> report on this module's test suite.
   ---------------------------- ------ ------ ------ ------ ------ ------ ------
   File                           stmt   bran   cond    sub    pod   time  total
   ---------------------------- ------ ------ ------ ------ ------ ------ ------
-  blib/lib/Tree.pm              100.0  100.0  100.0  100.0  100.0   79.5  100.0
-  blib/lib/Tree/Binary.pm        96.1   95.0  100.0  100.0  100.0    6.6   96.5
-  blib/lib/Tree/Fast.pm          99.4   95.5   91.7  100.0  100.0   13.9   98.5
-  Total                          98.9   96.8   97.4  100.0  100.0  100.0   98.6
+  blib/lib/Tree.pm              100.0  100.0   94.4  100.0  100.0   67.3   99.7
+  blib/lib/Tree/Binary.pm        96.4   95.0  100.0  100.0  100.0   10.7   96.7
+  blib/lib/Tree/Fast.pm          99.4   95.5   91.7  100.0  100.0   22.0   98.6
+  Total                          98.9   96.8   94.9  100.0  100.0  100.0   98.5
   ---------------------------- ------ ------ ------ ------ ------ ------ ------
 
 =head1 ACKNOWLEDGEMENTS

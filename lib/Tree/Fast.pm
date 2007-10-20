@@ -1,9 +1,11 @@
 package Tree::Fast;
 
-use strict;
-use warnings;
+use 5.006;
 
-our $VERSION = '1.00';
+use strict;
+use warnings FATAL => 'all';
+
+our $VERSION = '1.01';
 
 use Scalar::Util qw( blessed weaken );
 
@@ -33,17 +35,29 @@ sub _init {
     return $self;
 }
 
+sub _clone_self {
+    my $self = shift;
+
+    my $value = @_ ? shift : $self->value;
+    my $clone = blessed($self)->new( $value );
+    return blessed($self)->new( $value );
+}
+
+sub _clone_children {
+    my ($self, $clone) = @_;
+
+    if ( my @children = @{$self->{_children}} ) {
+        $clone->add_child({}, map { $_->clone } @children );
+    }
+}
+
 sub clone {
     my $self = shift;
 
     return $self->new(@_) unless blessed $self;
 
-    my $value = @_ ? shift : $self->value;
-    my $clone = blessed($self)->new( $value );
-
-    if ( my @children = @{$self->{_children}} ) {
-        $clone->add_child( map { $_->clone } @children );
-    }
+    my $clone = $self->_clone_self(@_);
+    $self->_clone_children($clone);
 
     return $clone;
 }

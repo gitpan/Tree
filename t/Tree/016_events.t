@@ -20,8 +20,8 @@ is( $tree->add_event_handler({
         push @stack, "Added @args to $node";
     },
     value => sub {
-        my ($node, @args) = @_;
-        push @stack, "Value changed: @args from $node";
+        my ($node, $old, $new) = @_;
+        push @stack, "Value changed: $old -> $new from $node";
     },
 }), $tree, "add_event_handler() chains and handles multiple entries" );
 
@@ -51,7 +51,7 @@ cmp_ok( @stack, '==', 3, "Events trigger on the actor, not the acted-upon" );
 
 $tree->set_value( 'new value' );
 
-is( $stack[3], "Value changed: root from $tree", "remove_child event" );
+is( $stack[3], "Value changed: root -> new value from $tree", "remove_child event" );
 
 $tree->value();
 
