@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use Scalar::Util qw( blessed weaken );
 
@@ -145,6 +145,10 @@ sub set_value {
 
 sub meta {
     my $self = shift;
+    my $meta = shift;
+
+    $self->{_meta} = {%{$self->{_meta} }, %$meta} if ($meta && !blessed($meta) && ref($meta) eq 'HASH');
+
     return $self->{_meta};
 }
 
@@ -331,78 +335,76 @@ Tree::Fast - the fastest possible implementation of a tree in pure Perl
 
 This is meant to be the core implementation for L<Tree>, stripped down as much
 as possible. There is no error-checking, bounds-checking, event-handling,
-convenience methods, or anything else of the sort. If you want something fuller-
-featured, please look at L<Tree>, which is a wrapper around Tree::Fast.
+convenience methods, or anything else of the sort. If you want something fuller-featured,
+please look at L<Tree>, which is a wrapper around Tree::Fast.
 
 =head1 METHODS
 
-=head2 Constructor
+=head2 Constructors
 
-=over 4
+=head2 new([$value])
 
-=item B<new([$value])>
+Here, [] indicate an optional parameter.
 
-This will return a Tree object. It will accept one parameter which, if passed,
-will become the value (accessible by L<value()>). All other parameters will be
+This will return a C<Tree> object. It will accept one parameter which, if passed,
+will become the I<value> (accessible by C<value()>). All other parameters will be
 ignored.
 
-If you call C<$tree-E<gt>new([$value])>, it will instead call C<clone()>, then set
-the value of the clone to $value.
+If you call C<< $tree->new([$value]) >>, it will instead call C<clone()>, then set
+the I<value> of the clone to $value.
 
-=item B<clone()>
+=head2 clone()
 
 This will return a clone of C<$tree>. The clone will be a root tree, but all
 children will be cloned.
 
-If you call C<Tree-E<gt>clone([$value])>, it will instead call C<new()>.
+If you call C<< Tree->clone([$value]) >>, it will instead call C<new()>.
 
 B<NOTE:> the value is merely a shallow copy. This means that all references
 will be kept.
 
-=back
-
 =head2 Behaviors
 
-=over 4
+=head2 add_child($options, @nodes)
 
-=item B<add_child($options, @nodes)>
-
-This will add all the @nodes as children of C<$tree>. $options is a required
-hashref that specifies options for add_child(). The optional parameters are:
+This will add all the C<@nodes> as children of C<$tree>. C<$options> is a required
+hashref that specifies options for C<add_child()>. The optional parameters are:
 
 =over 4
 
 =item * at
 
-This specifies the index to add @nodes at. If specified, this will be passed
+This specifies the index to add C<@nodes> at. If specified, this will be passed
 into splice(). The only exceptions are if this is 0, it will act as an
 unshift(). If it is unset or undefined, it will act as a push().
 
 =back
 
-=item B<remove_child($options, @nodes)>
+=head2 remove_child($options, @nodes)
 
-This will remove all the @nodes from the children of C<$tree>. You can either
+This will remove all the C<@nodes> from the children of C<$tree>. You can either
 pass in the actual child object you wish to remove, the index of the child you
 wish to remove, or a combination of both.
 
 $options is a required hashref that specifies parameters for remove_child().
 Currently, no parameters are used.
 
-=item B<mirror()>
+=head2 mirror()
 
 This will modify the tree such that it is a mirror of what it was before. This
 means that the order of all children is reversed.
 
 B<NOTE>: This is a destructive action. It I<will> modify the tree's internal
 structure. If you wish to get a mirror, yet keep the original tree intact, use
-C<my $mirror = $tree-E<gt>clone-E<gt>mirror;>
+C<< my $mirror = $tree->clone->mirror >>.
 
-=item B<traverse( [$order] )>
+=head2 traverse( [$order] )
 
-When called in list context (C<my @traversal = $tree-E<gt>traverse()>), this will
+Here, [] indicate an optional parameter.
+
+When called in list context (C<< my @traversal = $tree->traverse() >>), this will
 return a list of the nodes in the given traversal order. When called in scalar
-context (C<my $traversal = $tree-E<gt>traverse()>), this will return a closure
+context (C<< my $traversal = $tree->traverse() >>), this will return a closure
 that will, over successive calls, iterate over the nodes in the given
 traversal order. When finished it will return false.
 
@@ -412,39 +414,37 @@ The various traversal orders do the following steps:
 
 =over 4
 
-=item * Pre-order (aka Prefix traversal)
+=item * Pre-order
 
 This will return the node, then the first sub tree in pre-order traversal,
 then the next sub tree, etc.
 
-Use C<$tree-E<gt>PRE_ORDER> as the C<$order>.
+Use C<< $tree->PRE_ORDER >> as the C<$order>.
 
-=item * Post-order (aka Prefix traversal)
+=item * Post-order
 
 This will return the each sub-tree in post-order traversal, then the node.
 
-Use C<$tree-E<gt>POST_ORDER> as the C<$order>.
+Use C<< $tree->POST_ORDER >> as the C<$order>.
 
-=item * Level-order (aka Prefix traversal)
+=item * Level-order
 
 This will return the node, then the all children of the node, then all
 grandchildren of the node, etc.
 
-Use C<$tree-E<gt>LEVEL_ORDER> as the C<$order>.
-
-=back
+Use C<< $tree->LEVEL_ORDER >> as the C<$order>.
 
 =back
 
 =head2 Accessors
 
-=over 4
-
-=item * B<parent()>
+=head2 parent()
 
 This will return the parent of C<$tree>.
 
-=item * B<children( [ $idx, [$idx, ..] ] )>
+=head2 children( [ $idx, [$idx, ..] ] )
+
+Here, [] indicate optional parameters.
 
 This will return the children of C<$tree>. If called in list context, it will
 return all the children. If called in scalar context, it will return the
@@ -454,15 +454,19 @@ You may optionally pass in a list of indices to retrieve. This will return the
 children in the order you asked for them. This is very much like an
 arrayslice.
 
-=item * B<value()>
+=head2 value()
 
 This will return the value stored in the node.
 
-=item * B<set_value([$value])>
+=head2 set_value([$value])
 
-This will set the value stored in the node to $value, then return $self.
+Here, [] indicate an optional parameter.
 
-=item * B<meta()>
+This will set the I<value> stored in the node to $value, then return $self.
+
+If C<$value> is not provided, undef is used.
+
+=head2 meta()
 
 This will return a hashref that can be used to store whatever metadata the client
 wishes to store. For example, L<Tree::Persist::DB> uses this to store database
@@ -473,14 +477,12 @@ top-level metadata hashref, keyed by your package name. L<Tree::Persist> does
 this, using a unique key for each persistence layer associated with that tree.
 This will help prevent clobbering of metadata.
 
-=back
-
 =head1 NULL TREE
 
-If you call C<$self-E<gt>parent> on a root node, it will return a Tree::Null
+If you call C<< $self->parent >> on a root node, it will return a Tree::Null
 object. This is an implementation of the Null Object pattern optimized for
-usage with L<Forest>. It will evaluate as false in every case (using
-L<overload>) and all methods called on it will return a Tree::Null object.
+usage with L<Tree>. It will evaluate as false in every case (using
+I<overload>) and all methods called on it will return a Tree::Null object.
 
 =head2 Notes
 
@@ -538,6 +540,6 @@ Copyright 2004, 2005 by Infinity Interactive, Inc.
 L<http://www.iinteractive.com>
 
 This library is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself. 
+the same terms as Perl itself.
 
 =cut
