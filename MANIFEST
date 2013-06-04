@@ -1,6 +1,6 @@
 Build.PL
 Changelog.ini
-CHANGES
+Changes
 lib/Tree.pm
 lib/Tree/Binary2.pm
 lib/Tree/Fast.pm
